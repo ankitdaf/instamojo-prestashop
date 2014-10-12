@@ -50,6 +50,29 @@ public function uninstall()
 
 public function getContent()
 {
+        if (isset($_REQUEST['update_settings'])) {
+            if (empty($_REQUEST['PAYMENT_BASE']))
+                $this->errors[] = $this->l('Merchant Id is required.');
+            if (empty($_REQUEST['API_KEY']))
+                $this->errors[] = $this->l('Merchant Key Id is required.');
+            if (empty($_REQUEST['AUTH_TOKEN']))
+                $this->errors[] = $this->l('Secret Key is required.');
+             if (empty($_REQUEST['TXN_ID_NAME']))
+                $this->errors[] = $this->l('Secret Key is required.');
+
+            if (!sizeof($this->errors))
+                $settings_updated = 1;
+            else
+                $settings_updated = 0;
+
+            Configuration::updateValue('MERCHANT_ID', $_REQUEST['merchant_id']);
+            Configuration::updateValue('SECRET_KEY', $_REQUEST['secretkey']);
+            Configuration::updateValue('MERCHANT_KEY_ID', $_REQUEST['merchant_key_id']);
+            Configuration::updateValue('PAYMENT_BUTTON', $_REQUEST['payment_button']);
+            Configuration::updateValue('UI_MODE', $_REQUEST['ui_mode']);
+        }
+
+
     $output = null;
  
     if (Tools::isSubmit('submit'.$this->name))
@@ -102,7 +125,15 @@ public function hookdisplayPayment($params) {
         } else {
             $redirect_url = 'http://' . htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8') . __PS_BASE_URI__ . 'modules/instamojo/validation.php';
         }
-$imname = $address->firstname . ' ' . $address->lastname;
+
+$imnamefull = $address->firstname . ' ' . $address->lastname;
+if(strlen($imnamefull)>20) {        // Should I be using strlen? Is it safe?
+$imname = substr($imnamefull,0,20);
+}
+else {
+$imname= $imnamefull;
+}
+
 $imemail = $email_address;
 $imphone = $address->phone_mobile;
 $imamount = $Amount;
